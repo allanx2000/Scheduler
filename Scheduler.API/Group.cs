@@ -63,17 +63,25 @@ namespace Scheduler.API
 
             foreach (var i in TopologicalOrder)
             {
-                List<DateTime> dst = new List<DateTime>();
+                List<DateTime> allStarts = new List<DateTime>();
 
-                dst.Add(ToDate(startTime, i.StartTime));
+                //Min
+                allStarts.Add(startTime);
+
+                if (i.StartTime != null)
+                    allStarts.Add(ToDate(startTime, i.StartTime));
 
                 foreach (var d in i.Dependencies)
                 {
-                    dst.Add(endTimes[d.Name]);
+                    allStarts.Add(endTimes[d.Name]);
                 }
 
-                var st = dst.Max();
-                var et = ToDate(st, i.StartTime) + i.Duration;
+                //Parent
+                if (i.Parent != null)
+                    allStarts.Add(endTimes[i.Parent.Name]);
+
+                var st = allStarts.Max();
+                var et = st + i.Duration;
 
                 sorted.Add(new SortedItem(st, i));
                 endTimes.Add(i.Name, et);
